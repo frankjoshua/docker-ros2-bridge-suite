@@ -10,6 +10,8 @@ Runs a ros2 bidge suite in a Docker container. Probably need --network="host" be
 ```
 docker run -it \
     --network="host" \
+    --ipc=host \
+    --pid=host \
     frankjoshua/ros2-bridge-suite
 ```
 

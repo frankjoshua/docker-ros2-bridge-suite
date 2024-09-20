@@ -2,7 +2,6 @@ FROM frankjoshua/ros2
 
 # ** [Optional] Uncomment this section to install additional packages. **
 #
-USER root
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
    && apt-get -y install --no-install-recommends ros-$ROS_DISTRO-rosbridge-* \
@@ -14,9 +13,11 @@ RUN apt-get update \
 ENV DEBIAN_FRONTEND=dialog
 
 # Set up auto-source of workspace for ros user
-ARG WORKSPACE
-RUN echo "if [ -f ${WORKSPACE}/install/setup.bash ]; then source ${WORKSPACE}/install/setup.bash; fi" >> /home/ros/.bashrc
+WORKDIR /root
+COPY ros2_ws ./ros2_ws/
+RUN cd ros2_ws && . /opt/ros/$ROS_DISTRO/setup.sh && colcon build
 
-USER ros
-ENTRYPOINT [ "/bin/bash", "-i", "-c" ]
-CMD ["ros2 launch rosbridge_server rosbridge_websocket_launch.xml"]
+COPY ros_entrypoint.sh /ros_entrypoint.sh
+RUN chmod +x /ros_entrypoint.sh
+ENTRYPOINT ["/ros_entrypoint.sh"]
+CMD [ "/bin/bash", "-i", "-c", "ros2 launch rosbridge_server rosbridge_websocket_launch.xml"]
